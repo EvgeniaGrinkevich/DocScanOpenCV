@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">DocScanner</string>
+    <string name="snackbar_msg_request_permissions">Please Grant Permissions to scan documents</string>
+    <string name="snackbar_button_enable">ENABLE</string>
+</resources>
