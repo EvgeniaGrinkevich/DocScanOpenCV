@@ -1,4 +1,4 @@
-package com.beaverlisk.docscanner;
+package com.exadel.docscanplugin;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -9,9 +9,6 @@ import android.view.View;
 
 import java.util.ArrayList;
 
-/**
- * Created by Evgenia Grinkevich on 17, March, 2021
- **/
 public class CanvasView extends View {
 
     private final ArrayList<ViewShape> shapes = new ArrayList<>();

@@ -1,0 +1,20 @@
+{
+  "name": "cordova-plugin-doc-scanner",
+  "version": "1.0.0",
+  "description": "Cordova Plugin for Document Scanner - auto edges detect and image crop",
+  "cordova": {
+    "id": "cordova-plugin-doc-scanner",
+    "platforms": [
+      "android"
+    ]
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android",
+    "document scanner",
+    "camera",
+    "document",
+    "scan"
+  ],
+  "author": "yhrynkevich"
+}

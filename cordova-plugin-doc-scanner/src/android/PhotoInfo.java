@@ -1,4 +1,4 @@
-package com.beaverlisk.docscanner;
+package com.exadel.docscanplugin;
 
 import android.net.Uri;
 
@@ -6,9 +6,6 @@ import org.opencv.core.Point;
 
 import java.util.HashMap;
 
-/**
- * Created by Evgenia Grinkevich on 15, March, 2021
- **/
 public class PhotoInfo {
 
     private final int width;

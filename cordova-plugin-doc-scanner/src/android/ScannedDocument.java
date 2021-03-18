@@ -1,4 +1,4 @@
-package com.beaverlisk.docscanner;
+package com.exadel.docscanplugin;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -6,9 +6,6 @@ import org.opencv.core.Size;
 
 import java.util.HashMap;
 
-/**
- * Created by Evgenia Grinkevich on 15, March, 2021
- **/
 public class ScannedDocument {
 
     public static final String KEY_RECTANGLE_TOP_LEFT = "topLeft";

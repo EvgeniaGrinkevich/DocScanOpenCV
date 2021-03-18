@@ -1,4 +1,4 @@
-package com.beaverlisk.docscanner;
+package com.exadel.docscanplugin;
 
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -21,9 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
-/**
- * Created by Evgenia Grinkevich on 15, March, 2021
- **/
 public class ImageProcessorHandler extends Handler {
 
     private static final String TAG = "ImageProcessor";
@@ -79,7 +76,6 @@ public class ImageProcessorHandler extends Handler {
             numOfSquares++;
             if (numOfSquares == numOfRectangles) {
                 openNoteCameraView.requestPicture();
-                //todo handle auto-capture
                 openNoteCameraView.waitSpinnerVisible();
                 numOfSquares = 0;
             }

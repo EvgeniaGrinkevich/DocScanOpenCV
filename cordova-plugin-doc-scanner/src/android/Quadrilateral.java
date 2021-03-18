@@ -1,11 +1,8 @@
-package com.beaverlisk.docscanner;
+package com.exadel.docscanplugin;
 
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 
-/**
- * Created by Evgenia Grinkevich on 15, March, 2021
- **/
 public class Quadrilateral {
 
     public MatOfPoint contour;

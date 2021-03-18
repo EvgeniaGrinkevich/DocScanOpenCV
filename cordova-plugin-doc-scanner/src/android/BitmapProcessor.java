@@ -1,4 +1,4 @@
-package com.beaverlisk.docscanner;
+package com.exadel.docscanplugin;
 
 import android.content.Context;
 import android.graphics.Bitmap;

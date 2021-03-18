@@ -1,10 +1,7 @@
-package com.beaverlisk.docscanner;
+package com.exadel.docscanplugin;
 
 import org.opencv.core.Mat;
 
-/**
- * Created by Evgenia Grinkevich on 15, March, 2021
- **/
 public class PreviewFrame {
 
     private final boolean previewOnly;

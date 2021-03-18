@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin xmlns:android="http://schemas.android.com/apk/res/android" id="cordova-plugin-doc-scanner" version="1.0.0"
+    xmlns="http://apache.org/cordova/ns/plugins/1.0">
+    <name>DocScanner</name>
+    <platform name="android">
+
+        <js-module name="DocScannerPlugin" src="www/DocScannerPlugin.js">
+            <clobbers target="DocScannerPlugin" />
+        </js-module>
+
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="DocScannerPlugin">
+                <param name="android-package" value="com.exadel.docscanplugin.DocScannerPlugin" />
+            </feature>
+        </config-file>
+
+        <config-file parent="/manifest" target="AndroidManifest.xml">
+            <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="30" />
+            <uses-permission android:name="android.permission.CAMERA" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+            <uses-feature android:name="android.hardware.camera" android:required="true" />
+        </config-file>
+
+        <framework src="com.quickbirdstudios:opencv:4.3.0" />
+        <framework src="androidx.appcompat:appcompat:1.2.0" />
+
+        <source-file src="src/android/DocScannerPlugin.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/AnimationRunnable.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/BitmapProcessor.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/CanvasView.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/DocumentSaver.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/ImageProcessorHandler.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/ImageProcessorMessage.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/OpenNoteCameraView.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/PhotoInfo.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/PreviewFrame.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/Quadrilateral.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/RGBOverlayColor.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/ScannedDocument.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/ScannerActivity.java" target-dir="src/com/exadel/docscanplugin" />
+        <source-file src="src/android/ScanConstants.java" target-dir="src/com/exadel/docscanplugin" />
+
+        <source-file src="src/android/res/anim/blink.xml" target-dir="res/anim" />
+        <source-file src="src/android/res/layout/activity_main.xml" target-dir="res/layout" />
+        <source-file src="src/android/res/layout/activity_open_note_scanner.xml" target-dir="res/layout" />
+
+    </platform>
+</plugin>
