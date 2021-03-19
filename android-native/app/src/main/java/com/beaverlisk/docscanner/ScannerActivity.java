@@ -31,21 +31,32 @@ public class ScannerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(getResources().getIdentifier("activity_main", "layout", getPackageName()));
+        setContentView(R.layout.activity_main);
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         LayoutInflater lf = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        rootContainer = (FrameLayout) lf.inflate(
-                getResources().getIdentifier("activity_open_note_scanner", "layout", getPackageName()), null);
+        rootContainer = (FrameLayout) lf.inflate(R.layout.activity_open_note_scanner, null);
         openNoteCameraView = new OpenNoteCameraView(this, -1, this, rootContainer);
         openNoteCameraView.setOnProcessingListener((inProcessing) -> Log.w("WUF", "onProcessingChange"));
-        openNoteCameraView.setOnScannerListener(photoInfo -> {
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra(ScanConstants.KEY_EXTRA_IMAGE_URI, photoInfo.getCroppedImageUri());
-            setResult(Activity.RESULT_OK, resultIntent);
-            openNoteCameraView.invalidate();
-            new Handler(Looper.getMainLooper()).postDelayed(this::finish, 1000);
+        openNoteCameraView.setOnScannerListener(new OpenNoteCameraView.OnScannerListener() {
+            @Override
+            public void onPictureTaken(PhotoInfo photoInfo) {
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra(ScanConstants.KEY_EXTRA_IMAGE_CONTENT_URI, photoInfo.getCroppedImageUri());
+                setResult(Activity.RESULT_OK, resultIntent);
+                openNoteCameraView.invalidate();
+                new Handler(Looper.getMainLooper()).postDelayed(() -> finish(), 1000);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra(ScanConstants.KEY_EXTRA_ERROR, error);
+                setResult(Activity.RESULT_CANCELED, resultIntent);
+                openNoteCameraView.invalidate();
+                new Handler(Looper.getMainLooper()).postDelayed(() -> finish(), 1000);
+            }
         });
         if (requestPermissions()) {
             initCameraView();
@@ -53,7 +64,7 @@ public class ScannerActivity extends AppCompatActivity {
     }
 
     private void initCameraView() {
-        FrameLayout root = findViewById(getResources().getIdentifier("root", "id", getPackageName()));
+        FrameLayout root = findViewById(R.id.root);
         root.addView(openNoteCameraView,
                 0,
                 new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)

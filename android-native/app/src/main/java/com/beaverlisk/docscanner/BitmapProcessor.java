@@ -42,12 +42,10 @@ public class BitmapProcessor {
 
     @Nullable
     public static Bitmap decodeSampledBitmapFromUri(@NonNull Context context, @NonNull Uri imagePath, int reqWidth, int reqHeight) {
-        Bitmap bitmap = null;
-        // First decode with inJustDecodeBounds=true to check dimensions
+        Bitmap bitmap;
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-
-        InputStream stream = null;
+        InputStream stream;
         try {
             stream = context.getContentResolver().openInputStream(imagePath);
             BitmapFactory.decodeStream(stream, new Rect(), options);

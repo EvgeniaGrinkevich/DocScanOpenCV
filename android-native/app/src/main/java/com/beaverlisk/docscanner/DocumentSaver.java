@@ -40,7 +40,7 @@ public class DocumentSaver {
         Uri scannedDocumentUri;
 
         ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.Images.Media.MIME_TYPE, ScanConstants.MIME_TYPE_IMAGE_JPEG);
         values.put(MediaStore.Images.Media.DATE_ADDED, document.dateCreated / 1000);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -53,7 +53,7 @@ public class DocumentSaver {
                 try {
                     outputStream = appContext.getContentResolver().openOutputStream(scannedDocumentUri);
                     MatOfByte matOfByte = new MatOfByte();
-                    Imgcodecs.imencode(".jpg", endDoc, matOfByte);
+                    Imgcodecs.imencode(ScanConstants.IMAGE_FILE_FORMAT_EXTENSION_JPEG, endDoc, matOfByte);
                     byte[] byteArray = matOfByte.toArray();
                     outputStream.write(byteArray);
                 } catch (Exception e) {
@@ -80,8 +80,12 @@ public class DocumentSaver {
                 folder.mkdirs();
                 Log.d(TAG, "wrote: created folder " + folder.getPath());
             }
-            String filePath = Environment.getExternalStorageDirectory().toString() + "/" + folderName + "/" + document.dateCreated
-                    + ".jpg";
+            String filePath = Environment.getExternalStorageDirectory().toString()
+                    + "/"
+                    + folderName
+                    + "/"
+                    + document.dateCreated
+                    + ScanConstants.IMAGE_FILE_FORMAT_EXTENSION_JPEG;
             Imgcodecs.imwrite(filePath, endDoc);
             values.put(MediaStore.MediaColumns.DATA, filePath);
             scannedDocumentUri = appContext.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);

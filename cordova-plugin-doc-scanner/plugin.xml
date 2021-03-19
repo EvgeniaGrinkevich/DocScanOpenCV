@@ -24,26 +24,9 @@
 
         <framework src="com.quickbirdstudios:opencv:4.3.0" />
         <framework src="androidx.appcompat:appcompat:1.2.0" />
-
+        <framework src="src/android/config.gradle" custom="true" type="gradleReference" />
+        <resource-file src="src/android/libs/android-doc-scan-release-1.0.aar" target="libs/android-doc-scan-release-1.0.aar" />
         <source-file src="src/android/DocScannerPlugin.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/AnimationRunnable.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/BitmapProcessor.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/CanvasView.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/DocumentSaver.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/ImageProcessorHandler.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/ImageProcessorMessage.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/OpenNoteCameraView.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/PhotoInfo.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/PreviewFrame.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/Quadrilateral.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/RGBOverlayColor.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/ScannedDocument.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/ScannerActivity.java" target-dir="src/com/exadel/docscanplugin" />
-        <source-file src="src/android/ScanConstants.java" target-dir="src/com/exadel/docscanplugin" />
-
-        <source-file src="src/android/res/anim/blink.xml" target-dir="res/anim" />
-        <source-file src="src/android/res/layout/activity_main.xml" target-dir="res/layout" />
-        <source-file src="src/android/res/layout/activity_open_note_scanner.xml" target-dir="res/layout" />
 
     </platform>
 </plugin>

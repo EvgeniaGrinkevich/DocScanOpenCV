@@ -12,6 +12,8 @@
 //import org.apache.cordova.PluginResult;
 //import org.json.JSONArray;
 //import org.json.JSONException;
+//import com.beaverlisk.docscanner.ScannerActivity;
+//import com.beaverlisk.docscanner.ScanConstants;
 //
 ///**
 // * Created by Evgenia Grinkevich on 18, March, 2021
@@ -58,7 +60,7 @@
 //        }
 //    }
 //
-//    @Nullable
+//
 //    private String getRealPath(Uri contentUri) {
 //        String picturePath = null;
 //        String[] filePathColumn = {MediaStore.Images.Media.DATA};

@@ -72,6 +72,8 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
 
     public interface OnScannerListener {
         void onPictureTaken(PhotoInfo photoInfo);
+
+        void onError(Throwable error);
     }
 
     public interface OnProcessingListener {
@@ -161,12 +163,9 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     }
 
     public void initOpenCv(Context context) {
-        canvasView = mainView.findViewById(
-                context.getResources().getIdentifier("canvas_view", "id", context.getPackageName()));
-        progressSpinner = mainView.findViewById(
-                context.getResources().getIdentifier("wait_spinner", "id", context.getPackageName()));
-        blinkView = mainView.findViewById(
-                context.getResources().getIdentifier("blink_view", "id", context.getPackageName()));
+        canvasView = mainView.findViewById(R.id.canvas_view);
+        progressSpinner = mainView.findViewById(R.id.wait_spinner);
+        blinkView = mainView.findViewById(R.id.blink_view);
 
         blinkView.setBackgroundColor(Color.WHITE);
         hostActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -226,8 +225,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     }
 
     public void turnCameraOn() {
-        surfaceView = mainView.findViewById(
-                context.getResources().getIdentifier("surfaceView", "id", context.getPackageName()));
+        surfaceView = mainView.findViewById(R.id.surfaceView);
         surfaceHolder = this.getHolder();
         surfaceHolder.addCallback(this);
         surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -346,7 +344,8 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
 
         PackageManager pm = hostActivity.getPackageManager();
 
-        if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS)) {
+        if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS)
+                && param.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
             param.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         } else {
             isFocused = true;
@@ -354,9 +353,17 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
             param.setFlashMode(enableTorch ? Camera.Parameters.FLASH_MODE_TORCH : Camera.Parameters.FLASH_MODE_OFF);
         }
-        param.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        if (param.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+            param.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        }
+        try {
+            mCamera.setParameters(param);
+        } catch (Exception e) {
+            Log.e(TAG, "failed setting camera params");
+            onScannedListener.onError(e);
+            e.printStackTrace();
+        }
 
-        mCamera.setParameters(param);
         mCamera.setDisplayOrientation(90);
 
         if (imageProcessor != null) {
@@ -468,9 +475,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     public void blinkScreen() {
         hostActivity.runOnUiThread(() -> {
             blinkView.bringToFront();
-            blinkView.startAnimation(AnimationUtils.loadAnimation(context,
-                    context.getResources().getIdentifier("blink", "anim", context.getPackageName()))
-            );
+            blinkView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.blink));
             blinkView.setVisibility(View.INVISIBLE);
         });
     }
@@ -543,9 +548,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         Display display = hostActivity.getWindowManager().getDefaultDisplay();
         Point displaySize = new Point();
         display.getRealSize(displaySize);
-        ImageView imageView = mainView.findViewById(
-                context.getResources().getIdentifier("image_view_scanned_animation", "id", context.getPackageName()));
-
+        ImageView imageView = mainView.findViewById(R.id.image_view_scanned_animation);
         AnimationRunnable runnable = new AnimationRunnable(imageUri, scannedDocument, imageView, displaySize);
         hostActivity.runOnUiThread(runnable);
         this.waitSpinnerInvisible();
