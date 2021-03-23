@@ -2,7 +2,7 @@
 Plugin for live document detection and auto cropping, returns either a URI or a base64 encoded string of the captured image.
 
 ##### Supported platforms
-- Android. Min SDK = 24, Target SDK = 30. Requires AndroidX.
+- Android. Min SDK = 24, Target SDK = 30.
 
 ### Usage
 `DocScannerPlugin.scan(successCallback, errorCallback, options)`

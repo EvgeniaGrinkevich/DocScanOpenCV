@@ -15,6 +15,7 @@ import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -26,8 +27,6 @@ import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
-import androidx.annotation.NonNull;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.JavaCameraView;
@@ -53,6 +52,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     private Activity hostActivity;
     private boolean mFlashMode = false;
     private boolean autoMode = true;
+    private boolean multiCapture = false;
     private HandlerThread imageProcessorThread;
     private View progressSpinner;
     private PictureCallback pCallback;
@@ -140,6 +140,10 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
             p.setFlashMode(enableTorch ? Camera.Parameters.FLASH_MODE_TORCH : Camera.Parameters.FLASH_MODE_OFF);
             mCamera.setParameters(p);
         }
+    }
+
+    public void setMultiCapture(boolean captureMultiple) {
+        this.multiCapture = captureMultiple;
     }
 
     public void capture() {
@@ -541,7 +545,9 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
                 ));
             }
         }
-        refreshCamera();
+        if (multiCapture) {
+            refreshCamera();
+        }
     }
 
     private void animateDocument(@NonNull Uri imageUri, @NonNull ScannedDocument scannedDocument) {

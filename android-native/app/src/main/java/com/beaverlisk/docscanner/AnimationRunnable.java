@@ -2,6 +2,7 @@ package com.beaverlisk.docscanner;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -11,8 +12,6 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-
-import androidx.annotation.NonNull;
 
 import org.opencv.core.Point;
 import org.opencv.core.Size;

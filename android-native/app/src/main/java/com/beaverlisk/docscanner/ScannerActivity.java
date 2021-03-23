@@ -10,14 +10,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 /**
  * Created by Evgenia Grinkevich on 15, March, 2021
@@ -25,19 +25,22 @@ import androidx.core.content.ContextCompat;
 public class ScannerActivity extends AppCompatActivity {
 
     private final int PERMISSION_REQUEST_CODE = 1029;
+    private final long FINISH_DELAY_MILLIS = 600;
     private OpenNoteCameraView openNoteCameraView;
-    private FrameLayout rootContainer;
+    private FrameLayout cameraViewLayout;
+    private boolean convertToBase64 = false;
+    private boolean captureMultiple = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
+        setContentView(R.layout.activity_scanner);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         LayoutInflater lf = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        rootContainer = (FrameLayout) lf.inflate(R.layout.activity_open_note_scanner, null);
-        openNoteCameraView = new OpenNoteCameraView(this, -1, this, rootContainer);
+        cameraViewLayout = (FrameLayout) lf.inflate(R.layout.activity_open_note_scanner, null);
+
+        openNoteCameraView = new OpenNoteCameraView(this, -1, this, cameraViewLayout);
         openNoteCameraView.setOnProcessingListener((inProcessing) -> Log.w("WUF", "onProcessingChange"));
         openNoteCameraView.setOnScannerListener(new OpenNoteCameraView.OnScannerListener() {
             @Override
@@ -45,8 +48,10 @@ public class ScannerActivity extends AppCompatActivity {
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra(ScanConstants.KEY_EXTRA_IMAGE_CONTENT_URI, photoInfo.getCroppedImageUri());
                 setResult(Activity.RESULT_OK, resultIntent);
-                openNoteCameraView.invalidate();
-                new Handler(Looper.getMainLooper()).postDelayed(() -> finish(), 1000);
+                if (!captureMultiple) {
+                    openNoteCameraView.invalidate();
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> finish(), FINISH_DELAY_MILLIS);
+                }
             }
 
             @Override
@@ -55,7 +60,7 @@ public class ScannerActivity extends AppCompatActivity {
                 resultIntent.putExtra(ScanConstants.KEY_EXTRA_ERROR, error);
                 setResult(Activity.RESULT_CANCELED, resultIntent);
                 openNoteCameraView.invalidate();
-                new Handler(Looper.getMainLooper()).postDelayed(() -> finish(), 1000);
+                new Handler(Looper.getMainLooper()).postDelayed(() -> finish(), FINISH_DELAY_MILLIS);
             }
         });
         if (requestPermissions()) {
@@ -69,7 +74,28 @@ public class ScannerActivity extends AppCompatActivity {
                 0,
                 new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
         );
-        root.addView(rootContainer, 1, openNoteCameraView.getLayoutParams());
+        root.addView(cameraViewLayout, 1, openNoteCameraView.getLayoutParams());
+
+        Bundle propertiesBundle = getIntent().getBundleExtra(ScanConstants.KEY_BUNDLE_EXTRA);
+        if (propertiesBundle != null) {
+            String overlayColor = propertiesBundle.getString(ScanConstants.KEY_BUNDLE_PROP_OVERLAY_COLOR);
+            String borderColor = propertiesBundle.getString(ScanConstants.KEY_BUNDLE_PROP_BORDER_COLOR);
+            int detectionCount = propertiesBundle.getInt(ScanConstants.KEY_BUNDLE_PROP_DETECTION_COUNT, -1);
+            boolean enableTorch = propertiesBundle.getBoolean(ScanConstants.KEY_BUNDLE_PROP_ENABLE_TORCH, false);
+            double brightness = propertiesBundle.getDouble(ScanConstants.KEY_BUNDLE_PROP_BRIGHTNESS, -1);
+            double contrast = propertiesBundle.getDouble(ScanConstants.KEY_BUNDLE_PROP_CONTRAST, -1);
+            convertToBase64 = propertiesBundle.getBoolean(ScanConstants.KEY_BUNDLE_PROP_USE_BASE_64, false);
+            captureMultiple = propertiesBundle.getBoolean(ScanConstants.KEY_BUNDLE_PROP_CAPTURE_MULTIPLE, false);
+
+            if (overlayColor != null) openNoteCameraView.setOverlayColor(overlayColor);
+            if (borderColor != null) openNoteCameraView.setOverlayBorderColor(borderColor);
+            if (detectionCount != -1) openNoteCameraView.setDetectionCountBeforeCapture(detectionCount);
+            if (brightness != -1) openNoteCameraView.setBrightness(brightness);
+            if (contrast != -1) openNoteCameraView.setContrast(brightness);
+
+            openNoteCameraView.setMultiCapture(captureMultiple);
+            openNoteCameraView.setEnableTorch(enableTorch);
+        }
         openNoteCameraView.setCameraPermissionGranted();
     }
 

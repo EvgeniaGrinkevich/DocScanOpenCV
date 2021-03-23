@@ -1,8 +1,7 @@
 package com.beaverlisk.docscanner;
 
 import android.graphics.Color;
-
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
