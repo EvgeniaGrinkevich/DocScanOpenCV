@@ -61,7 +61,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     private int numberOfRectangles = 15;
     private Boolean enableTorch = false;
 
-    private final RGBOverlayColor argbOverlayColor = new RGBOverlayColor();
+    private final PreviewOverlayColor argbOverlayColor = new PreviewOverlayColor();
 
     private View blinkView = null;
     private View mainView = null;
