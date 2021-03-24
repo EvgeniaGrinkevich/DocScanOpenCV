@@ -19,7 +19,27 @@ Plugin for live document detection and auto cropping, returns either a URI or a 
 | borderColor                 | `rgba(66,165,245, 0.7)`  | `string`  | RGBA color of the borders of detected rectangle                   |
 | detectionCountBeforeCapture | `15`                     | `integer` | Number of correct rectangle to detect before capture              |
 | enableTorch                 | `false`                  | `bool`    | Allows to active or deactivate flash during document detection    |
-| brightness                  | `10`                     | `float`   | Increase or decrease image brightness. Normal as default.         |
-| contrast                    | `1`                      | `float`   | Increase or decrease image contrast. Normal as default            |
+| brightness                  | `10`                     | `float`   | Increase or decrease image brightness.Recommended values [0-100]  |
+| contrast                    | `1`                      | `float`   | Increase or decrease image contrast. Recommended values [1.0-3.0] |           |
 | useBase64                   | `false`                  | `bool`    | If base64 representation should be passed instead of image uri's  |
 | captureMultiple             | `false`                  | `bool`    | Keeps the scanner on after a successful capture                   |
+
+### Sample options JSON
+All properties are optional
+```
+{
+  "overlayColor": "rgba(66,165,245, 0.7)",
+  "borderColor": "rgba(66,165,245, 0.7)",
+  "detectionCountBeforeCapture": 15,
+  "enableTorch": false,
+  "brightness": 10,
+  "contrast": 1,
+  "useBase64": true,
+  "captureMultiple": true
+}
+```
+
+### Contrast and brightness OpenCV transformation 
+For contrast and brightness adjustment, plugin use OpenCV `Mat.convertTo()` [function](https://docs.opencv.org/master/d3/d63/classcv_1_1Mat.html#adf88c60c5b4980e05bb556080916978b ) 
+
+For additional information, please see the [link](https://docs.opencv.org/2.4/doc/tutorials/core/basic_linear_transform/basic_linear_transform.html)

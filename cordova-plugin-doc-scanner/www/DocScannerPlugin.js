@@ -1,25 +1,23 @@
+var argscheck = require('cordova/argscheck');
+var exec = require('cordova/exec');
+
 module.exports = {
     scan: function (successCallback, errorCallback, options) {
+        argscheck.checkArgs('FFO', 'DocScannerPlugin.scan', arguments);
         options = options || {};
-		options.sourceType = (options.sourceType == undefined) ? 1 : options.sourceType;
-		options.fileName = (options.fileName == undefined) ? "image" : options.fileName;
-		options.quality = (!isNaN(options.quality) && options.quality >= 1 && options.quality <= 5) ? options.quality : 1;
-		options.returnBase64 = (typeof options.returnBase64 === "boolean") ? options.returnBase64 : false;
 
-    	cordova.exec(successCallback, errorCallback, "DocScannerPlugin", "scan", options);
+        var getValue = argscheck.getValue;
 
-//    	if((options.sourceType === 1 || options.sourceType === 0) && typeof options.fileName === "string")
-//    	{
-//			var sourceType = options.sourceType;	// 0 Gallery, 1 Camera
-//			var fileName = options.fileName;	// "image" if not specified
-//			var quality = options.quality;	// Quality defaults to 1 (highest). If value > 1, a smaller image is returned to save memory. https://developer.android.com/reference/android/graphics/BitmapFactory.Options.html#inSampleSize
-//			var returnBase64 = options.returnBase64;	// return base64 output if set to true. Defaults to false.
-//			var args = [sourceType, fileName, quality, returnBase64];
-//        	cordova.exec(successCallback, errorCallback, "DocScannerPlugin.java", "scanDoc", args);
-//    	}
-//    	else
-//    	{
-//    		alert("Incorrect options/argument values specified by the plugin user!");
-//    	}
+        var overlayColor = getValue(options.overlayColor, "");
+        var borderColor = getValue(options.borderColor, "");
+        var detectionCountBeforeCapture = getValue(options.detectionCountBeforeCapture, -1);
+        var enableTorch = getValue(options.enableTorch, false);
+        var brightness = getValue(options.brightness, -1);
+        var contrast = getValue(options.contrast, -1);
+        var useBase64 = getValue(options.useBase64, false);
+        var captureMultiple = getValue(options.captureMultiple, false);
+
+        var args = [overlayColor, borderColor, detectionCountBeforeCapture, enableTorch, brightness, contrast, useBase64, captureMultiple];
+        exec(successCallback, errorCallback, 'DocScannerPlugin', 'scan', args);
     }
 };
