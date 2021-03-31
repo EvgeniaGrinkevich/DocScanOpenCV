@@ -22,7 +22,6 @@ import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
@@ -324,18 +323,17 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
 
         int displayWidth = Math.min(size.y, size.x);
         int displayHeight = Math.max(size.y, size.x);
-
-        float displayRatio = (float) displayHeight / displayWidth;
-
         int previewHeight = displayHeight;
 
-        if (displayRatio > previewRatio) {
-            ViewGroup.LayoutParams surfaceParams = surfaceView.getLayoutParams();
-            previewHeight = (int) ((float) size.y / displayRatio * previewRatio);
-            surfaceParams.height = previewHeight;
-            surfaceView.setLayoutParams(surfaceParams);
-            canvasView.getLayoutParams().height = previewHeight;
-        }
+//        TODO validate later
+//        float displayRatio = (float) displayHeight / displayWidth;
+//        if (displayRatio > previewRatio) {
+//            ViewGroup.LayoutParams surfaceParams = surfaceView.getLayoutParams();
+//            previewHeight = (int) ((float) size.y / displayRatio * previewRatio);
+//            surfaceParams.height = previewHeight;
+//            surfaceView.setLayoutParams(surfaceParams);
+//            canvasView.getLayoutParams().height = previewHeight;
+//        }
 
         int hotAreaWidth = displayWidth / 4;
         int hotAreaHeight = previewHeight / 2 - hotAreaWidth;
