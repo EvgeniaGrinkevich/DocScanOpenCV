@@ -18,6 +18,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Created by Evgenia Grinkevich on 15, March, 2021
@@ -104,12 +107,12 @@ public class ScannerActivity extends AppCompatActivity {
                 || Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
         ) {
-            String[] requiredPermissions = new String[2];
-            requiredPermissions[0] = Manifest.permission.CAMERA;
+            List<String> requiredPermissions = new ArrayList<>();
+            requiredPermissions.add(Manifest.permission.CAMERA);
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                requiredPermissions[1] = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+                requiredPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
             }
-            ActivityCompat.requestPermissions(ScannerActivity.this, requiredPermissions, PERMISSION_REQUEST_CODE);
+            ActivityCompat.requestPermissions(ScannerActivity.this, requiredPermissions.toArray(new String[0]), PERMISSION_REQUEST_CODE);
             return false;
         } else {
             return true;
