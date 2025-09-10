@@ -162,6 +162,11 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         }
     }
 
+    public void setCameraPermissionGranted() {
+        super.setCameraPermissionGranted();
+        enableCameraView();
+    }
+
     public void initOpenCv(Context context) {
         canvasView = mainView.findViewById(R.id.canvas_view);
         progressSpinner = mainView.findViewById(R.id.wait_spinner);
