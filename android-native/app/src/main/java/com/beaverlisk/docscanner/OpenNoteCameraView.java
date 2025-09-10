@@ -26,10 +26,7 @@ import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
-import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.JavaCameraView;
-import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -177,24 +174,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         android.graphics.Point size = new android.graphics.Point();
         display.getRealSize(size);
 
-        BaseLoaderCallback openCVCallback = new BaseLoaderCallback(context) {
-            @Override
-            public void onManagerConnected(int status) {
-                if (status == LoaderCallbackInterface.SUCCESS) {
-                    Log.d(TAG, "SUCCESS init openCV: " + status);
-                    enableCameraView();
-                } else {
-                    Log.d(TAG, "ERROR init Opencv: " + status);
-                    super.onManagerConnected(status);
-                }
-            }
-        };
-
-        if (!OpenCVLoader.initDebug()) {
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, context, openCVCallback);
-        } else {
-            openCVCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        }
+        OpenCVLoader.initLocal();
 
         if (imageProcessorThread == null) {
             imageProcessorThread = new HandlerThread("Worker Thread");

@@ -53,7 +53,7 @@ public class QuadrilateralSelectionImageView extends ImageView {
 
     private void init(AttributeSet attrs, int defStyle) {
         TypedValue typedValue = new TypedValue();
-        getContext().getTheme().resolveAttribute(R.attr.colorAccent, typedValue, true);
+        getContext().getTheme().resolveAttribute(android.support.v7.appcompat.R.attr.colorAccent, typedValue, true);
         int colorAccent = typedValue.data;
 
         mBackgroundPaint = new Paint();
