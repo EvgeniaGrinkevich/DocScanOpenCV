@@ -26,6 +26,7 @@ import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
 import org.opencv.android.JavaCameraView;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -47,24 +48,21 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     private boolean isSafeToTakePicture;
     private Activity hostActivity;
     private boolean mFlashMode = false;
-    private boolean autoMode = true;
     private boolean multiCapture = false;
     private HandlerThread imageProcessorThread;
     private View progressSpinner;
     private PictureCallback pCallback;
-
     private boolean documentAnimation = false;
     private int numberOfRectangles = 15;
     private Boolean enableTorch = false;
-
     private final PreviewOverlayColor argbOverlayColor = new PreviewOverlayColor();
-
     private View blinkView = null;
     private View mainView = null;
-    private boolean manualCapture = false;
-
-    private OnScannerListener onScannedListener = null;
-    private OnProcessingListener processingListener = null;
+    private CaptureMode captureMode;
+    private OnScannerListener onScannedListener;
+    private OnProcessingListener processingListener;
+    private boolean imageProcessorBusy;
+    private boolean attemptToFocus;
 
     public interface OnScannerListener {
         void onPictureTaken(PhotoInfo photoInfo);
@@ -94,15 +92,25 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
 
     public OpenNoteCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.captureMode = CaptureMode.AUTO;
+        this.onScannedListener = null;
+        this.processingListener = null;
+        this.imageProcessorBusy = true;
+        this.attemptToFocus = false;
     }
 
     public OpenNoteCameraView(Context context, Integer numCam, Activity activity, FrameLayout frameLayout) {
         super(context, numCam);
+        this.captureMode = CaptureMode.AUTO;
+        this.onScannedListener = null;
+        this.processingListener = null;
+        this.imageProcessorBusy = true;
+        this.attemptToFocus = false;
         this.context = context;
         this.hostActivity = activity;
-        pCallback = this;
-        mainView = frameLayout;
-        initOpenCv(context);
+        this.pCallback = this;
+        this.mainView = frameLayout;
+        this.initOpenCv(context);
     }
 
     public void setDocumentAnimation(boolean animate) {
@@ -133,7 +141,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         this.enableTorch = enableTorch;
         if (mCamera != null) {
             Camera.Parameters p = mCamera.getParameters();
-            p.setFlashMode(enableTorch ? Camera.Parameters.FLASH_MODE_TORCH : Camera.Parameters.FLASH_MODE_OFF);
+            p.setFlashMode(enableTorch ? "torch" : "off");
             mCamera.setParameters(p);
         }
     }
@@ -146,8 +154,8 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         this.requestManualPicture();
     }
 
-    public void setManualOnly(boolean manualOnly) {
-        this.manualCapture = manualOnly;
+    public void setCaptureMode(CaptureMode captureMode) {
+        this.captureMode = captureMode;
     }
 
     public void setBrightness(double brightness) {
@@ -190,15 +198,11 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
             imageProcessor = new ImageProcessorHandler(imageProcessorThread.getLooper(), this);
         }
         this.setImageProcessorBusy(false);
-
     }
 
     public CanvasView getCanvasView() {
         return canvasView;
     }
-
-    private boolean imageProcessorBusy = true;
-    private boolean attemptToFocus = false;
 
     public void setImageProcessorBusy(boolean imageProcessorBusy) {
         this.imageProcessorBusy = imageProcessorBusy;
@@ -229,23 +233,22 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     private int findBestCamera() {
         int cameraId = -1;
         int numberOfCameras = Camera.getNumberOfCameras();
-        for (int i = 0; i < numberOfCameras; i++) {
+        for (int i = 0; i < numberOfCameras; cameraId = i++) {
             Camera.CameraInfo info = new Camera.CameraInfo();
             Camera.getCameraInfo(i, info);
             if (info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
                 cameraId = i;
                 break;
             }
-            cameraId = i;
         }
         return cameraId;
     }
 
-    public Size getMaxPreviewResolution() {
+    public Camera.Size getMaxPreviewResolution() {
         int maxWidth = 0;
-        Size currentResolution = null;
+        Camera.Size currentResolution = null;
         mCamera.lock();
-        for (Size size : getResolutionList()) {
+        for (Camera.Size size : getResolutionList()) {
             if (size.width > maxWidth) {
                 Log.d(TAG, "supported preview resolution: " + size.width + "x" + size.height);
                 maxWidth = size.width;
@@ -255,13 +258,13 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         return currentResolution;
     }
 
-    public Size getMaxPictureResolution(float previewRatio) {
+    public Camera.Size getMaxPictureResolution(float previewRatio) {
         int maxPixels = 0;
         int ratioMaxPixels = 0;
-        Size currentMaxRes = null;
-        Size ratioCurrentMaxRes = null;
-        for (Size r : getPictureResolutionList()) {
-            float pictureRatio = (float) r.width / r.height;
+        Camera.Size currentMaxRes = null;
+        Camera.Size ratioCurrentMaxRes = null;
+        for (Camera.Size r : getPictureResolutionList()) {
+            float pictureRatio = (float) r.width / (float) r.height;
             Log.d(TAG, "supported picture resolution: " + r.width + "x" + r.height + " ratio: " + pictureRatio);
             int resolutionPixels = r.width * r.height;
 
@@ -277,12 +280,11 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         }
 
         if (ratioCurrentMaxRes != null) {
-            Log.d(TAG, "Max supported picture resolution with preview aspect ratio: " + ratioCurrentMaxRes.width + "x"
-                    + ratioCurrentMaxRes.height);
+            Log.d(TAG, "Max supported picture resolution with preview aspect ratio: " + ratioCurrentMaxRes.width + "x" + ratioCurrentMaxRes.height);
             return ratioCurrentMaxRes;
-
+        } else {
+            return currentMaxRes;
         }
-        return currentMaxRes;
     }
 
     @Override
@@ -294,13 +296,11 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
             Log.e(TAG, "Error opening camera" + e.getMessage());
             return;
         }
-        Camera.Parameters param;
-        param = mCamera.getParameters();
-
-        Size pSize = getMaxPreviewResolution();
+        Camera.Parameters param = mCamera.getParameters();
+        Camera.Size pSize = getMaxPreviewResolution();
         param.setPreviewSize(pSize.width, pSize.height);
         param.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_AUTO);
-        float previewRatio = (float) pSize.width / pSize.height;
+        float previewRatio = (float) pSize.width / (float) pSize.height;
 
         Display display = hostActivity.getWindowManager().getDefaultDisplay();
         android.graphics.Point size = new android.graphics.Point();
@@ -308,22 +308,10 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
 
         int displayWidth = Math.min(size.y, size.x);
         int displayHeight = Math.max(size.y, size.x);
-        int previewHeight = displayHeight;
-
-//        TODO validate later
-//        float displayRatio = (float) displayHeight / displayWidth;
-//        if (displayRatio > previewRatio) {
-//            ViewGroup.LayoutParams surfaceParams = surfaceView.getLayoutParams();
-//            previewHeight = (int) ((float) size.y / displayRatio * previewRatio);
-//            surfaceParams.height = previewHeight;
-//            surfaceView.setLayoutParams(surfaceParams);
-//            canvasView.getLayoutParams().height = previewHeight;
-//        }
-
         int hotAreaWidth = displayWidth / 4;
-        int hotAreaHeight = previewHeight / 2 - hotAreaWidth;
+        int hotAreaHeight = displayHeight / 2 - hotAreaWidth;
 
-        Size maxRes = getMaxPictureResolution(previewRatio);
+        Camera.Size maxRes = getMaxPictureResolution(previewRatio);
         if (maxRes != null) {
             param.setPictureSize(maxRes.width, maxRes.height);
             Log.d(TAG, "max supported picture resolution: " + maxRes.width + "x" + maxRes.height);
@@ -335,10 +323,10 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
                 && param.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
             param.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         } else {
-            isFocused = true;
+            this.isFocused = true;
         }
         if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
-            param.setFlashMode(enableTorch ? Camera.Parameters.FLASH_MODE_TORCH : Camera.Parameters.FLASH_MODE_OFF);
+            param.setFlashMode(this.enableTorch ? Camera.Parameters.FLASH_MODE_TORCH : Camera.Parameters.FLASH_MODE_OFF);
         }
         if (param.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
             param.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
@@ -406,14 +394,12 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         Size pictureSize = camera.getParameters().getPreviewSize();
         if (isFocused && !imageProcessorBusy) {
             setImageProcessorBusy(true);
-            Mat yuv = new Mat(new org.opencv.core.Size(pictureSize.width, pictureSize.height * 1.5), CvType.CV_8UC1);
+            Mat yuv = new Mat(new org.opencv.core.Size((double) pictureSize.width, (double) pictureSize.height * (double) 1.5F), CvType.CV_8UC1);
             yuv.put(0, 0, data);
-            Mat mat = new Mat(new org.opencv.core.Size(pictureSize.width, pictureSize.height), CvType.CV_8UC4);
+            Mat mat = new Mat(new org.opencv.core.Size((double) pictureSize.width, (double) pictureSize.height), CvType.CV_8UC4);
             Imgproc.cvtColor(yuv, mat, Imgproc.COLOR_YUV2RGBA_NV21, 4);
             yuv.release();
-            if (!manualCapture) {
-                sendImageProcessorMessage(ImageProcessorMessage.MSG_PREVIEW_FRAME, new PreviewFrame(mat, autoMode, !(autoMode)));
-            }
+            sendImageProcessorMessage("previewFrame", new PreviewFrame(mat, this.captureMode == CaptureMode.AUTO || this.captureMode == CaptureMode.AUTO_MANUAL));
         }
     }
 
@@ -552,10 +538,10 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     }
 
     public boolean isEffectSupported(String effect) {
-        List<String> effectList = getEffectList();
-        for (String str : effectList) {
-            if (str.trim().contains(effect))
+        for (String str : getEffectList()) {
+            if (str.trim().contains(effect)) {
                 return true;
+            }
         }
         return false;
     }
@@ -570,7 +556,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         mCamera.setParameters(params);
     }
 
-    public List<Size> getResolutionList() {
+    public List<Camera.Size> getResolutionList() {
         return mCamera.getParameters().getSupportedPreviewSizes();
     }
 
@@ -601,7 +587,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         int maxWidth = 0;
         Size curRes = null;
         mCamera.lock();
-        for (Size r : getResolutionList()) {
+        for (Camera.Size r : getResolutionList()) {
             if (r.width > maxWidth) {
                 Log.d(TAG, "supported preview resolution: " + r.width + "x" + r.height);
                 maxWidth = r.width;
@@ -646,5 +632,4 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         isSafeToTakePicture = true;
         waitSpinnerInvisible();
     }
-
 }

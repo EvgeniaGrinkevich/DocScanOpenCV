@@ -29,7 +29,6 @@ public class QuadrilateralSelectionImageView extends ImageView {
     private Paint mCirclePaint;
     private Path mSelectionPath;
     private Path mBackgroundPath;
-
     private PointF mUpperLeftPoint;
     private PointF mUpperRightPoint;
     private PointF mLowerLeftPoint;
@@ -98,16 +97,16 @@ public class QuadrilateralSelectionImageView extends ImageView {
 
         mBackgroundPath.reset();
         mBackgroundPath.setFillType(Path.FillType.EVEN_ODD);
-        mBackgroundPath.addRect(0, 0, getWidth(), getHeight(), Path.Direction.CW);
+        mBackgroundPath.addRect(0.0F, 0.0F, getWidth(), getHeight(), Path.Direction.CW);
         mBackgroundPath.addPath(mSelectionPath);
 
         canvas.drawPath(mBackgroundPath, mBackgroundPaint);
         canvas.drawPath(mSelectionPath, mBorderPaint);
 
-        canvas.drawCircle(mUpperLeftPoint.x, mUpperLeftPoint.y, 30, mCirclePaint);
-        canvas.drawCircle(mUpperRightPoint.x, mUpperRightPoint.y, 30, mCirclePaint);
-        canvas.drawCircle(mLowerRightPoint.x, mLowerRightPoint.y, 30, mCirclePaint);
-        canvas.drawCircle(mLowerLeftPoint.x, mLowerLeftPoint.y, 30, mCirclePaint);
+        canvas.drawCircle(mUpperLeftPoint.x, mUpperLeftPoint.y, 30.0F, mCirclePaint);
+        canvas.drawCircle(mUpperRightPoint.x, mUpperRightPoint.y, 30.0F, mCirclePaint);
+        canvas.drawCircle(mLowerRightPoint.x, mLowerRightPoint.y, 30.0F, mCirclePaint);
+        canvas.drawCircle(mLowerLeftPoint.x, mLowerLeftPoint.y, 30.0F, mCirclePaint);
     }
 
     @Override
@@ -266,7 +265,7 @@ public class QuadrilateralSelectionImageView extends ImageView {
     private void setDefaultSelection() {
         RectF rect = new RectF();
 
-        float padding = 100;
+        float padding = 100.0F;
         rect.right = getWidth() - padding;
         rect.bottom = getHeight() - padding;
         rect.top = padding;
@@ -301,11 +300,7 @@ public class QuadrilateralSelectionImageView extends ImageView {
         double t = crossProduct(subtractPoints(q, p), s) / s_r_crossProduct;
         double u = crossProduct(subtractPoints(q, p), r) / s_r_crossProduct;
 
-        if (t < 0 || t > 1.0 || u < 0 || u > 1.0) {
-            return false;
-        } else {
-            return true;
-        }
+        return !(t < (double) 0.0F) && !(t > (double) 1.0F) && !(u < (double) 0.0F) && !(u > (double) 1.0F);
     }
 
     private PointF subtractPoints(PointF p1, PointF p2) {
@@ -315,5 +310,4 @@ public class QuadrilateralSelectionImageView extends ImageView {
     private float crossProduct(PointF v1, PointF v2) {
         return v1.x * v2.y - v1.y * v2.x;
     }
-
 }

@@ -22,48 +22,45 @@ public class BitmapProcessor {
 
     @Nullable
     public static String convertToBase64(@NonNull Context context, @NonNull Uri imagePath) {
-        Bitmap bitmap;
-        String base64;
-        InputStream stream;
         try {
-            stream = context.getContentResolver().openInputStream(imagePath);
-            bitmap = BitmapFactory.decodeStream(stream);
+            InputStream stream = context.getContentResolver().openInputStream(imagePath);
+            Bitmap bitmap = BitmapFactory.decodeStream(stream);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-            base64 = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP);
+            String base64 = Base64.encodeToString(outputStream.toByteArray(), 2);
             stream.close();
+            return base64;
         } catch (Exception exception) {
-            Log.e(TAG, "Unable to open or close input stream for Uri " + imagePath.toString());
+            Log.e(TAG, "Unable to open or close input stream for Uri " + imagePath);
             return null;
         }
-        return base64;
     }
 
     @Nullable
     public static Bitmap decodeSampledBitmapFromUri(@NonNull Context context, @NonNull Uri imagePath, int reqWidth, int reqHeight) {
-        Bitmap bitmap;
-        final BitmapFactory.Options options = new BitmapFactory.Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        InputStream stream;
         try {
-            stream = context.getContentResolver().openInputStream(imagePath);
+            InputStream stream = context.getContentResolver().openInputStream(imagePath);
             BitmapFactory.decodeStream(stream, new Rect(), options);
             stream.close();
         } catch (Exception exception) {
-            Log.e(TAG, "Unable to open or close input stream for Uri " + imagePath.toString());
+            Log.e(TAG, "Unable to open or close input stream for Uri " + imagePath);
             return null;
         }
+
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
         options.inJustDecodeBounds = false;
+
         try {
-            stream = context.getContentResolver().openInputStream(imagePath);
-            bitmap = BitmapFactory.decodeStream(stream, new Rect(), options);
+            InputStream stream = context.getContentResolver().openInputStream(imagePath);
+            Bitmap bitmap = BitmapFactory.decodeStream(stream, new Rect(), options);
             stream.close();
+            return bitmap;
         } catch (Exception exception) {
-            Log.e(TAG, "Unable to open or close input stream for Uri " + imagePath.toString());
+            Log.e(TAG, "Unable to open or close input stream for Uri " + imagePath);
             return null;
         }
-        return bitmap;
     }
 
     public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {

@@ -28,7 +28,7 @@ class AnimationRunnable implements Runnable {
     private final WeakReference<ImageView> imageViewWeakReference;
     private final android.graphics.Point displaySize;
     private Point[] previewPoints = null;
-    public org.opencv.core.Size previewSize = null;
+    public Size previewSize = null;
     public Uri imageUri;
     private Bitmap bitmap;
 
@@ -38,7 +38,7 @@ class AnimationRunnable implements Runnable {
                              @NonNull android.graphics.Point displaySize) {
         this.imageUri = imageUri;
         this.imageSize = document.processed.size();
-        imageViewWeakReference = new WeakReference<>(imageView);
+        this.imageViewWeakReference = new WeakReference<>(imageView);
         this.displaySize = displaySize;
         if (document.quadrilateral != null) {
             this.previewPoints = document.previewPoints;
@@ -47,45 +47,43 @@ class AnimationRunnable implements Runnable {
     }
 
     public double hypotenuse(Point a, Point b) {
-        return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+        return Math.sqrt(Math.pow(a.x - b.x, 2.0F) + Math.pow(a.y - b.y, 2.0F));
     }
 
     @Override
     public void run() {
-        ImageView imageView = imageViewWeakReference.get();
+        final ImageView imageView = imageViewWeakReference.get();
         if (imageView == null) return;
 
-        int width = Math.min(displaySize.x, displaySize.y);
-        int height = Math.max(displaySize.x, displaySize.y);
+        int width = Math.min(this.displaySize.x, this.displaySize.y);
+        int height = Math.max(this.displaySize.x, this.displaySize.y);
         // captured images are always in landscape, values should be swapped
-        double imageWidth = imageSize.height;
-        double imageHeight = imageSize.width;
+        double imageWidth = this.imageSize.height;
+        double imageHeight = this.imageSize.width;
 
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imageView.getLayoutParams();
 
-        if (previewPoints != null) {
-            double documentLeftHeight = hypotenuse(previewPoints[0], previewPoints[1]);
-            double documentBottomWidth = hypotenuse(previewPoints[1], previewPoints[2]);
-            double documentRightHeight = hypotenuse(previewPoints[2], previewPoints[3]);
-            double documentTopWidth = hypotenuse(previewPoints[3], previewPoints[0]);
-
+        if (this.previewPoints != null) {
+            double documentLeftHeight = hypotenuse(previewPoints[0], this.previewPoints[1]);
+            double documentBottomWidth = hypotenuse(previewPoints[1], this.previewPoints[2]);
+            double documentRightHeight = hypotenuse(previewPoints[2], this.previewPoints[3]);
+            double documentTopWidth = hypotenuse(previewPoints[3], this.previewPoints[0]);
             double documentWidth = Math.max(documentTopWidth, documentBottomWidth);
             double documentHeight = Math.max(documentLeftHeight, documentRightHeight);
 
             Log.d(TAG, "device: " + width + "x" + height + " image: " + imageWidth + "x" + imageHeight
                     + " document: " + documentWidth + "x" + documentHeight);
-
-            Log.d(TAG, "previewPoints[0] x=" + previewPoints[0].x + " y=" + previewPoints[0].y);
-            Log.d(TAG, "previewPoints[1] x=" + previewPoints[1].x + " y=" + previewPoints[1].y);
-            Log.d(TAG, "previewPoints[2] x=" + previewPoints[2].x + " y=" + previewPoints[2].y);
-            Log.d(TAG, "previewPoints[3] x=" + previewPoints[3].x + " y=" + previewPoints[3].y);
+            Log.d(TAG, "previewPoints[0] x=" + this.previewPoints[0].x + " y=" + this.previewPoints[0].y);
+            Log.d(TAG, "previewPoints[1] x=" + this.previewPoints[1].x + " y=" + this.previewPoints[1].y);
+            Log.d(TAG, "previewPoints[2] x=" + this.previewPoints[2].x + " y=" + this.previewPoints[2].y);
+            Log.d(TAG, "previewPoints[3] x=" + this.previewPoints[3].x + " y=" + this.previewPoints[3].y);
 
             // again, swap width and height
-            double xRatio = width / previewSize.height;
-            double yRatio = height / previewSize.width;
+            double xRatio = (double) width / this.previewSize.height;
+            double yRatio = (double) height / this.previewSize.width;
 
-            params.topMargin = (int) (previewPoints[3].x * yRatio);
-            params.leftMargin = (int) ((previewSize.height - previewPoints[3].y) * xRatio);
+            params.topMargin = (int) (this.previewPoints[3].x * yRatio);
+            params.leftMargin = (int) ((this.previewSize.height - this.previewPoints[3].y) * xRatio);
             params.width = (int) (documentWidth * xRatio);
             params.height = (int) (documentHeight * yRatio);
         } else {
@@ -95,28 +93,33 @@ class AnimationRunnable implements Runnable {
             params.height = height / 2;
         }
 
-        bitmap = BitmapProcessor.decodeSampledBitmapFromUri(imageView.getContext(), imageUri, params.width, params.height);
-        if (bitmap == null) return;
+        this.bitmap = BitmapProcessor.decodeSampledBitmapFromUri(imageView.getContext(), this.imageUri, params.width, params.height);
+        if (this.bitmap == null) return;
 
-        imageView.setImageBitmap(bitmap);
+        imageView.setImageBitmap(this.bitmap);
         imageView.setVisibility(View.VISIBLE);
 
-        ScaleAnimation scaleAnimation = new ScaleAnimation(1, 0, 1, 0);
+        AnimationSet animationSet = getAnimationSet(params, height, imageView);
+        imageView.startAnimation(animationSet);
+    }
+
+    private AnimationSet getAnimationSet(RelativeLayout.LayoutParams params, int height, ImageView imageView) {
+        ScaleAnimation scaleAnimation = new ScaleAnimation(1.0F, 0.0F, 1.0F, 0.0F);
         TranslateAnimation translateAnimation = new TranslateAnimation(
                 Animation.ABSOLUTE,
-                0,
+                0.0F,
                 Animation.ABSOLUTE,
-                -params.leftMargin,
+                (float) (-params.leftMargin),
                 Animation.ABSOLUTE,
-                0,
+                0.0F,
                 Animation.ABSOLUTE,
-                height - params.topMargin
+                (float) (height - params.topMargin)
         );
 
         AnimationSet animationSet = new AnimationSet(true);
         animationSet.addAnimation(scaleAnimation);
         animationSet.addAnimation(translateAnimation);
-        animationSet.setDuration(600);
+        animationSet.setDuration(600L);
         animationSet.setInterpolator(new AccelerateInterpolator());
         animationSet.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -134,7 +137,6 @@ class AnimationRunnable implements Runnable {
             public void onAnimationRepeat(Animation animation) {
             }
         });
-        imageView.startAnimation(animationSet);
+        return animationSet;
     }
 }
-

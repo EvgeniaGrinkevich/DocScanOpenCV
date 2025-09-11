@@ -16,6 +16,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import java.util.List;
  **/
 public class ScannerActivity extends AppCompatActivity {
 
+    private final String TAG = "ScannerActivity";
     private final int PERMISSION_REQUEST_CODE = 1029;
     private final long FINISH_DELAY_MILLIS = 600;
     private OpenNoteCameraView openNoteCameraView;
@@ -44,7 +47,7 @@ public class ScannerActivity extends AppCompatActivity {
         cameraViewLayout = (FrameLayout) lf.inflate(R.layout.activity_open_note_scanner, null);
 
         openNoteCameraView = new OpenNoteCameraView(this, -1, this, cameraViewLayout);
-        openNoteCameraView.setOnProcessingListener((inProcessing) -> Log.w("WUF", "onProcessingChange"));
+        openNoteCameraView.setOnProcessingListener((inProcessing) -> Log.w(TAG, "onProcessingChange"));
         openNoteCameraView.setOnScannerListener(new OpenNoteCameraView.OnScannerListener() {
             @Override
             public void onPictureTaken(PhotoInfo photoInfo) {
@@ -72,11 +75,12 @@ public class ScannerActivity extends AppCompatActivity {
     }
 
     private void initCameraView() {
+        Button captureButton = cameraViewLayout.findViewById(R.id.capture);
+        captureButton.setOnClickListener((e) -> this.openNoteCameraView.capture());
+        cameraViewLayout.findViewById(R.id.cancel).setOnClickListener((e) -> this.onBackPressed());
+
         FrameLayout root = findViewById(R.id.root);
-        root.addView(openNoteCameraView,
-                0,
-                new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
-        );
+        root.addView(openNoteCameraView, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         root.addView(cameraViewLayout, 1, openNoteCameraView.getLayoutParams());
 
         Bundle propertiesBundle = getIntent().getBundleExtra(ScanConstants.KEY_BUNDLE_EXTRA);
@@ -90,11 +94,18 @@ public class ScannerActivity extends AppCompatActivity {
             convertToBase64 = propertiesBundle.getBoolean(ScanConstants.KEY_BUNDLE_PROP_USE_BASE_64, false);
             captureMultiple = propertiesBundle.getBoolean(ScanConstants.KEY_BUNDLE_PROP_CAPTURE_MULTIPLE, false);
 
+            CaptureMode captureMode = CaptureMode.valueOf(propertiesBundle.getInt(ScanConstants.KEY_BUNDLE_PROP_CAPTURE_MODE, CaptureMode.AUTO.getValue()));
+            captureMode = captureMode != null ? captureMode : CaptureMode.AUTO;
+            if (captureMode != CaptureMode.AUTO) {
+                captureButton.setVisibility(View.VISIBLE);
+            }
+
+            this.openNoteCameraView.setCaptureMode(captureMode);
             if (overlayColor != null) openNoteCameraView.setOverlayColor(overlayColor);
             if (borderColor != null) openNoteCameraView.setOverlayBorderColor(borderColor);
             if (detectionCount != -1) openNoteCameraView.setDetectionCountBeforeCapture(detectionCount);
-            if (brightness != -1) openNoteCameraView.setBrightness(brightness);
-            if (contrast != -1) openNoteCameraView.setContrast(brightness);
+            if (brightness != (double) -1.0F) openNoteCameraView.setBrightness(brightness);
+            if (contrast != (double) -1.0F) openNoteCameraView.setContrast(brightness);
 
             openNoteCameraView.setMultiCapture(captureMultiple);
             openNoteCameraView.setEnableTorch(enableTorch);

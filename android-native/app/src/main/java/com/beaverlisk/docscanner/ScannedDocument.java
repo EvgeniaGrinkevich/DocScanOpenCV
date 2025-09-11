@@ -15,19 +15,15 @@ public class ScannedDocument {
     public static final String KEY_RECTANGLE_TOP_RIGHT = "topRight";
     public static final String KEY_RECTANGLE_BOTTOM_RIGHT = "bottomRight";
     public static final String KEY_RECTANGLE_BOTTOM_LEFT = "bottomLeft";
-
     public Mat original;
     public Mat processed;
     public Quadrilateral quadrilateral;
     public Point[] previewPoints;
     public Size previewSize;
     public Size originalSize;
-
     public Point[] originalPoints;
-
     public int heightWithRatio;
     public int widthWithRatio;
-
     public long dateCreated;
 
     public ScannedDocument(Mat original) {

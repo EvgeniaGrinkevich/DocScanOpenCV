@@ -47,31 +47,35 @@ public class DocumentSaver {
             values.put(MediaStore.Images.Media.DATE_TAKEN, document.dateCreated);
             values.put(MediaStore.Images.Media.IS_PENDING, true);
             scannedDocumentUri = appContext.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
             if (scannedDocumentUri != null) {
-                OutputStream outputStream = null;
-                try {
-                    outputStream = appContext.getContentResolver().openOutputStream(scannedDocumentUri);
-                    MatOfByte matOfByte = new MatOfByte();
-                    Imgcodecs.imencode(ScanConstants.IMAGE_FILE_FORMAT_EXTENSION_JPEG, endDoc, matOfByte);
-                    byte[] byteArray = matOfByte.toArray();
-                    outputStream.write(byteArray);
-                } catch (Exception e) {
-                    Log.e(TAG, "Exception during saving file " + e.getMessage());
-                    e.printStackTrace();
-                    return null;
-                } finally {
-                    try {
-                        if (outputStream != null) {
-                            outputStream.close();
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Exception during saving file " + e.getMessage());
-                        e.printStackTrace();
+                boolean writeSuccess = false;
+                try (OutputStream outputStream = appContext.getContentResolver().openOutputStream(scannedDocumentUri)) {
+                    if (outputStream != null) {
+                        MatOfByte matOfByte = new MatOfByte();
+                        Imgcodecs.imencode(ScanConstants.IMAGE_FILE_FORMAT_EXTENSION_JPEG, endDoc, matOfByte);
+                        byte[] byteArray = matOfByte.toArray();
+                        outputStream.write(byteArray);
+                        outputStream.flush();
+                        writeSuccess = true;
                     }
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception during saving file: " + e.getMessage());
+                    e.printStackTrace();
                 }
-                values.clear();
-                values.put(MediaStore.Images.Media.IS_PENDING, false);
-                appContext.getContentResolver().update(scannedDocumentUri, values, null, null);
+
+                if (writeSuccess) {
+                    values.clear();
+                    values.put(MediaStore.Images.Media.IS_PENDING, false);
+                    appContext.getContentResolver().update(scannedDocumentUri, values, null, null);
+                } else {
+                    try {
+                        appContext.getContentResolver().delete(scannedDocumentUri, null, null);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to delete incomplete file entry: " + e.getMessage());
+                    }
+                    scannedDocumentUri = null;
+                }
             }
         } else {
             File folder = new File(Environment.getExternalStorageDirectory().toString() + "/" + folderName);
