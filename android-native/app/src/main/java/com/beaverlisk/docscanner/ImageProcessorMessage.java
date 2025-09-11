@@ -17,11 +17,10 @@ public class ImageProcessorMessage {
     }
 
     public String getCommand() {
-        return command;
+        return this.command;
     }
 
     public Object getObj() {
-        return obj;
+        return this.obj;
     }
-
 }

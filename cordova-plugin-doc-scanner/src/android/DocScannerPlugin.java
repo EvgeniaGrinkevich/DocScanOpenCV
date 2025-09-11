@@ -78,7 +78,7 @@ public class DocScannerPlugin extends CordovaPlugin {
         bundle.putBoolean(ScanConstants.KEY_BUNDLE_PROP_ENABLE_TORCH, enableTorch);
         bundle.putBoolean(ScanConstants.KEY_BUNDLE_PROP_USE_BASE_64, useBase64);
         bundle.putBoolean(ScanConstants.KEY_BUNDLE_PROP_CAPTURE_MULTIPLE, captureMultiple);
-
+        bundle.putInt(ScanConstants.KEY_BUNDLE_PROP_CAPTURE_MODE, args.getInt(8));
         return bundle;
     }
 

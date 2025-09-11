@@ -81,7 +81,7 @@ public class PreviewOverlayColor {
                     greenGroup = matcher.group(2);
                     blueGroup = matcher.group(3);
                 }
-                int alpha = alphaGroup != null ? (int) (255 * Float.parseFloat(alphaGroup)) : ALPHA_DEFAULT;
+                int alpha = alphaGroup != null ? (int) (255.0F * Float.parseFloat(alphaGroup)) : ALPHA_DEFAULT;
                 int red = redGroup != null ? Integer.parseInt(redGroup) : RED_DEFAULT;
                 int green = greenGroup != null ? Integer.parseInt(greenGroup) : GREEN_DEFAULT;
                 int blue = blueGroup != null ? Integer.parseInt(blueGroup) : BLUE_DEFAULT;

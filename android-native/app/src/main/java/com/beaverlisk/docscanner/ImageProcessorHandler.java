@@ -320,5 +320,4 @@ public class ImageProcessorHandler extends Handler {
 
         return contours;
     }
-
 }
